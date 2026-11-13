@@ -18,6 +18,10 @@ Supports **two playback modes**:
 1. **Live Network Streaming (`stream_client.py`)** — Stream full-length movies (`.mp4`, `.mkv`, `.avi`, `.webm`) of any duration in real time from your PC over TCP port `10703` into a 64-slot ringbuffer in Net DIMM Cartridge RAM (`0x04010000`), complete with **live arcade joystick seeking (`-10s/+10s`, `-60s/+60s`)**.
 2. **Self-Contained ROMFS (`rom://movie.nvp`)** — Bake a video clip directly into `naomi_player.bin` so it plays immediately on boot without a host PC connected.
 
+### Yes, it really works...
+
+<img src="assets/naomi.png" width="480" alt="Sega NAOMI Cabinet running NAOMI Video Player" />
+
 ---
 
 ## Features
