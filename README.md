@@ -26,11 +26,9 @@ Supports **two playback modes**:
 
 ## Features
 
-- **Full-Resolution 320×240 4-Color Block Truncation Coding (BTC) + Delta Codec**:
-  - Every pixel is rendered at true 320×240 resolution (up to 4 refined RGB565 palette entries per 4×4 block with 2-bit per-pixel indexing, zero 2×2 subsampling).
+- **640×480 (31 kHz VGA) Hardware-Upscaled Video Output**:
+  - Streams at `320×240` using a custom **4-Color Block Truncation Coding (BTC) + Delta Codec** (~20–25 KB/frame to fit within the Net DIMM's TCP/cartridge bus bandwidth limit) and hardware-upscales on the **PowerVR2 (CLX2)** GPU to full **`640×480` VGA at 60 Hz** with toggleable **Bilinear Filtering** and **4:3 / 16:9 Letterbox** aspect ratio modes.
   - Decodes in < 1.5 ms per frame on the 200 MHz Hitachi SH-4 CPU.
-- **PowerVR2 (CLX2) Hardware Scaling**:
-  - Hardware-upscales `320×240` RGB565 textures to `640×480` at 60Hz with toggleable **Bilinear Filtering** and **4:3 / 16:9 Letterbox** aspect ratio modes.
 - **Yamaha AICA 16-Bit Stereo PCM Audio**:
   - 16,000 Hz 16-bit stereo PCM audio streamed into the AICA hardware ringbuffer.
 - **Full JVS Arcade Controls**:
@@ -46,8 +44,16 @@ Supports **two playback modes**:
 
 ## Quick Start
 
-### 1. [Download the binaries (`naomi_player.bin` & `stream_client.py`)](https://github.com/ragnar0K/Naomi-Video-Player/releases/tag/v1.0.0)
-Grab `naomi_player.bin` and `stream_client.py` directly from the [Releases page](https://github.com/ragnar0K/Naomi-Video-Player/releases/tag/v1.0.0).
+### Host PC Requirements (Windows & Linux)
+- **Python 3**: Zero `pip` packages required (uses only the Python standard library).
+- **FFmpeg**: `ffmpeg` and `ffprobe` must be in your system `PATH` (`sudo apt install ffmpeg` on Linux, or `winget install Gyan.FFmpeg` on Windows).
+- **No compiler needed** if you download the pre-built `encode_nvp.exe` (Windows x64) or `encode_nvp` (Linux x64) from [Releases](https://github.com/ragnar0K/Naomi-Video-Player/releases/tag/v1.0.0)!
+
+### 1. [Download the binaries](https://github.com/ragnar0K/Naomi-Video-Player/releases/tag/v1.0.0)
+Grab the ready-to-use files from the [Releases page](https://github.com/ragnar0K/Naomi-Video-Player/releases/tag/v1.0.0):
+- `naomi_player.bin` — Boot this on your Sega NAOMI Net DIMM
+- `stream_client.py` — Host PC streaming script
+- `encode_nvp.exe` (**Windows x64**) or `encode_nvp` (**Linux x64**) — Place in the same folder as `stream_client.py` (on Linux, run `chmod +x encode_nvp`)
 
 ...and if you like to suffer, build `naomi_player.bin` yourself:
 ```bash

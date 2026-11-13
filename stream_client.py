@@ -134,12 +134,37 @@ def probe_video_duration(video_path: str) -> float:
 
 
 def ensure_encoder_built(root_dir: str) -> str:
-    enc_bin = os.path.join(root_dir, "tools", "encode_nvp")
-    enc_src = os.path.join(root_dir, "tools", "encode_nvp.c")
-    if not os.path.exists(enc_bin) or os.path.getmtime(enc_src) > os.path.getmtime(enc_bin):
-        print("Compiling host stream encoder tools/encode_nvp...")
-        subprocess.check_call(["gcc", "-O3", "-Wall", enc_src, "-o", enc_bin])
-    return enc_bin
+    bin_name = "encode_nvp.exe" if os.name == "nt" else "encode_nvp"
+    candidates_bin = [
+        os.path.join(root_dir, bin_name),
+        os.path.join(root_dir, "tools", bin_name),
+    ]
+    candidates_src = [
+        os.path.join(root_dir, "tools", "encode_nvp.c"),
+        os.path.join(root_dir, "encode_nvp.c"),
+    ]
+
+    enc_src = next((p for p in candidates_src if os.path.exists(p)), None)
+    enc_bin = next((p for p in candidates_bin if os.path.exists(p)), None)
+
+    if enc_bin and (not enc_src or os.path.getmtime(enc_bin) >= os.path.getmtime(enc_src)):
+        return enc_bin
+
+    if enc_src:
+        target_bin = os.path.join(os.path.dirname(enc_src), bin_name)
+        try:
+            print(f"Compiling host stream encoder {target_bin}...")
+            subprocess.check_call(["gcc", "-O3", "-Wall", enc_src, "-o", target_bin])
+            return target_bin
+        except Exception:
+            if enc_bin:
+                return enc_bin
+            raise
+
+    raise FileNotFoundError(
+        f"Could not find '{bin_name}' or 'encode_nvp.c' in '{root_dir}'. "
+        f"Download '{bin_name}' from the GitHub Releases page and place it next to 'stream_client.py'."
+    )
 
 
 def read_frame_packet(pipe) -> Optional[bytes]:

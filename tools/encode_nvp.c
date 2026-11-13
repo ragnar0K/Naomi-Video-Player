@@ -19,6 +19,16 @@
 #include <stdint.h>
 #include <string.h>
 
+#ifdef _WIN32
+#include <io.h>
+#include <fcntl.h>
+#define POPEN_READ(cmd) _popen((cmd), "rb")
+#define PCLOSE(fp)      _pclose(fp)
+#else
+#define POPEN_READ(cmd) popen((cmd), "r")
+#define PCLOSE(fp)      pclose(fp)
+#endif
+
 #define VID_W 320
 #define VID_H 240
 #define BLOCK_W (VID_W / 4)
@@ -387,8 +397,8 @@ int main(int argc, char **argv)
         );
     }
 
-    FILE *vpipe = popen(vcmd, "r");
-    FILE *apipe = popen(acmd, "r");
+    FILE *vpipe = POPEN_READ(vcmd);
+    FILE *apipe = POPEN_READ(acmd);
     if (!vpipe || !apipe)
     {
         fprintf(stderr, "Error: failed to launch ffmpeg pipes.\n");
@@ -396,6 +406,12 @@ int main(int argc, char **argv)
     }
 
     FILE *out = stdout;
+#ifdef _WIN32
+    if (stream_mode)
+    {
+        _setmode(_fileno(stdout), _O_BINARY);
+    }
+#endif
     nvp_file_header_t fhdr;
     nvp_keyframe_entry_t keyframes[MAX_KEYFRAMES];
     memset(&fhdr, 0, sizeof(fhdr));
@@ -415,7 +431,9 @@ int main(int argc, char **argv)
         fhdr.fps = (uint16_t)fps;
         fhdr.audio_rate = AUDIO_RATE;
 
-        const char *slash = strrchr(input_video, '/');
+        const char *slash1 = strrchr(input_video, '/');
+        const char *slash2 = strrchr(input_video, '\\');
+        const char *slash = (slash1 > slash2) ? slash1 : slash2;
         const char *base = slash ? (slash + 1) : input_video;
         strncpy(fhdr.title, base, sizeof(fhdr.title) - 1);
 
@@ -494,8 +512,8 @@ int main(int argc, char **argv)
         frame_idx++;
     }
 
-    pclose(vpipe);
-    pclose(apipe);
+    PCLOSE(vpipe);
+    PCLOSE(apipe);
 
     if (!stream_mode)
     {
